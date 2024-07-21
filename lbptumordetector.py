@@ -4,7 +4,6 @@ import tkinter as tk
 from tkinter import filedialog
 from skimage.feature import local_binary_pattern
 import numpy as np
-from sklearn.metrics import precision_score, recall_score, f1_score, accuracy_score
 
 # Function to calculate the Local Binary Pattern (LBP) histogram of an image with adjusted parameters
 def calculate_lbp(image, radius=3, num_points=24):
@@ -12,7 +11,7 @@ def calculate_lbp(image, radius=3, num_points=24):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
     # Compute the LBP
     lbp = local_binary_pattern(gray, num_points, radius, method='uniform')
-    # Calculate the histogram of the LBP image
+    # Calculate the histogram of the LBP image , decide how m
     hist, _ = np.histogram(lbp.ravel(), bins=np.arange(0, num_points + 3), range=(0, num_points + 2))
     # Normalize the histogram
     hist = hist.astype("float")
@@ -42,7 +41,7 @@ def detect_label(upload_image_path, training_folder_paths, threshold=0.5):
             reference_image_path = os.path.join(folder_path, image_name)
             reference_image = cv2.imread(reference_image_path)
             if reference_image is None:
-                print(f"Error: Unable to read the reference image {image_name} in folder {os.path.basename(folder_path)}.")
+                print(f"Error: Unable to read the reference image {image_name} in folder {folder_name}.")
                 continue
             # Calculate LBP histogram for the reference image
             reference_hist = calculate_lbp(reference_image)
@@ -79,20 +78,6 @@ if __name__ == "__main__":
         
         if result != "Unknown":
             print("Classified label:", result)
-
-            # Evaluate performance
-            true_label = os.path.basename(os.path.dirname(os.path.abspath(upload_image_path)))
-            predicted_label = result
-
-            accuracy = accuracy_score([true_label], [predicted_label])
-            precision = precision_score([true_label], [predicted_label], average='weighted', zero_division=1)
-            recall = recall_score([true_label], [predicted_label], average='weighted', zero_division=1)
-            f1 = f1_score([true_label], [predicted_label], average='weighted', zero_division=1)
-
-            print("Accuracy:", accuracy)
-            print("Precision:", precision)
-            print("Recall:", recall)
-            print("F1 Score:", f1)
         else:
             print("No match found in training data.")
     else:
